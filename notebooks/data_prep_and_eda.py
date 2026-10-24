@@ -114,3 +114,84 @@ print(f"    Clean Dataset Shape: {df_clean.shape}")
 print(
     f"    Total Sales: ₹{df_clean['Sales'].sum():,.2f} | Total Profit: ₹{df_clean['Profit'].sum():,.2f}"
 )
+
+# ==========================================
+# TASK 4 & TASK 5: EXPLORATORY DATA ANALYSIS (EDA) & VISUALIZATIONS
+# ==========================================
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+print("\n--- TASK 4: EXPLORATORY DATA ANALYSIS (DESCRIPTIVE STATS) ---")
+print(df_clean.describe())
+
+# 1. Visualization 1: Sales & Profit by Product Category (Bar Chart)
+plt.figure(figsize=(8, 5))
+cat_perf = df_clean.groupby("Category")[["Sales", "Profit"]].sum().reset_index()
+cat_perf_melted = pd.melt(cat_perf, id_vars=["Category"], value_vars=["Sales", "Profit"], 
+                          var_name="Metric", value_name="Amount_INR")
+
+sns.barplot(data=cat_perf_melted, x="Category", y="Amount_INR", hue="Metric", palette=["#1f77b4", "#2ca02c"])
+plt.title("Total Sales and Profit by Product Category", fontsize=13, fontweight='bold', pad=12)
+plt.xlabel("Product Category", fontsize=11)
+plt.ylabel("Amount in INR (₹)", fontsize=11)
+plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: f"₹{x*1e-6:.1f}M"))
+plt.grid(axis='y', linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.savefig("visualizations/vis1_sales_profit_by_category.png", dpi=300)
+plt.close()
+print("Saved: visualizations/vis1_sales_profit_by_category.png")
+
+# 2. Visualization 2: Sales Contribution by Customer Segment (Donut Chart)
+plt.figure(figsize=(6, 6))
+seg_sales = df_clean.groupby("Segment")["Sales"].sum()
+colors = ['#2b5c8f', '#e67e22', '#27ae60']
+plt.pie(seg_sales, labels=seg_sales.index, autopct='%1.1f%%', startangle=140, 
+        colors=colors, wedgeprops=dict(width=0.45, edgecolor='w', linewidth=2))
+plt.title("Sales Contribution by Customer Segment", fontsize=13, fontweight='bold', pad=12)
+plt.tight_layout()
+plt.savefig("visualizations/vis2_segment_sales_share.png", dpi=300)
+plt.close()
+print("Saved: visualizations/vis2_segment_sales_share.png")
+
+# 3. Visualization 3: Monthly Revenue & Profit Trend (Dual Line Chart)
+df_clean['YearMonth'] = df_clean['OrderDate'].dt.to_period('M').astype(str)
+monthly_trend = df_clean.groupby('YearMonth')[['Sales', 'Profit']].sum().reset_index()
+
+plt.figure(figsize=(9, 4.8))
+plt.plot(monthly_trend['YearMonth'], monthly_trend['Sales'], marker='o', linewidth=2.5, color='#1f77b4', label='Revenue (Sales)')
+plt.plot(monthly_trend['YearMonth'], monthly_trend['Profit'], marker='s', linewidth=2, color='#2ca02c', linestyle='--', label='Profit')
+plt.title("Monthly Sales and Profit Trend (Jan 2026 - Jun 2026)", fontsize=13, fontweight='bold', pad=12)
+plt.xlabel("Month", fontsize=11)
+plt.ylabel("Amount in INR (₹)", fontsize=11)
+plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: f"₹{x*1e-6:.1f}M"))
+plt.legend(frameon=True)
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.savefig("visualizations/vis3_monthly_sales_trend.png", dpi=300)
+plt.close()
+print("Saved: visualizations/vis3_monthly_sales_trend.png")
+
+# 4. Visualization 4: Correlation Heatmap
+plt.figure(figsize=(7, 5))
+corr_cols = ['Quantity', 'Discount', 'BasePrice', 'Sales', 'Profit']
+corr_matrix = df_clean[corr_cols].corr()
+sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='Blues', cbar=True, square=True, linewidths=0.5)
+plt.title("Correlation Matrix of Numeric Features", fontsize=13, fontweight='bold', pad=12)
+plt.tight_layout()
+plt.savefig("visualizations/vis4_correlation_heatmap.png", dpi=300)
+plt.close()
+print("Saved: visualizations/vis4_correlation_heatmap.png")
+
+# 5. Visualization 5: Sales Distribution Across Geographic Regions (Boxplot / Outliers)
+plt.figure(figsize=(8, 4.8))
+sns.boxplot(data=df_clean, x='Region', y='Sales', palette='Set2')
+plt.title("Order Sales Distribution and Outliers across Regions", fontsize=13, fontweight='bold', pad=12)
+plt.xlabel("Geographic Region", fontsize=11)
+plt.ylabel("Sales per Order (₹)", fontsize=11)
+plt.grid(axis='y', linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.savefig("visualizations/vis5_regional_sales_distribution.png", dpi=300)
+plt.close()
+print("Saved: visualizations/vis5_regional_sales_distribution.png")
+
+print("\n--- ALL 5 VISUALIZATIONS GENERATED SUCCESSFULLY IN visualizations/ ---")
